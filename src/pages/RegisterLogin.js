@@ -4,6 +4,7 @@ import { useState, useContext, useRef, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/Auth";
+import { API_URL } from "../action/ServerConnection";
 
 const RegisterLogin = () => {
   // const { setAuth } = useContext(AuthContext);
@@ -70,7 +71,7 @@ const RegisterLogin = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/register",
+        `${API_URL}/register`,
         { username, email, password, id },
         { headers: { "Content-Type": "application/json" } }
       );
