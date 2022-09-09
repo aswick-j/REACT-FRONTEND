@@ -78,9 +78,9 @@ const RegisterLogin = () => {
 
       setSuccess(true);
       console.log("--c-dc-", response.data);
-      setUsername("");
-      setEmail("");
-      setPassword("");
+      // setUsername("");
+      // setEmail("");
+      // setPassword("");
       navigate("/");
       console.log({ username, email, password, id });
     } catch (error) {
@@ -95,20 +95,27 @@ const RegisterLogin = () => {
     }
   };
 
-  const loginSubmit = (e) => {
+  const loginSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      axios.post(
-        "http://localhost:5000/login",
+      const response = await axios.post(
+        `${API_URL}/login`,
         { email, password },
         { headers: { "Content-Type": "application/json" } }
       );
-
+      setSuccess(true);
       navigate("/");
     } catch (error) {
       console.error(error.data);
       navigate("/auth");
+      if (!error.response) {
+        setErrMsg("No Server Response");
+      } else if (error.response?.status === 400) {
+        setErrMsg("Email Not Found or Incorrect Password");
+      } else {
+        setErrMsg("Some Field is Missing");
+      }
     }
   };
   return (
@@ -121,7 +128,7 @@ const RegisterLogin = () => {
               <label for="chk" aria-hidden="true">
                 Sign up
               </label>
-              
+
               <input
                 value={username}
                 // ref={userNameRef}
@@ -136,7 +143,10 @@ const RegisterLogin = () => {
                 onChange={handlePassword}
                 placeholder="Password"
               />
-              <p aria-live="assertive" style={{ color: "red",textAlign:"center" }}>
+              <p
+                aria-live="assertive"
+                style={{ color: "red", textAlign: "center" }}
+              >
                 {errMsg}
               </p>
               <button type="submit">Sign up</button>
@@ -160,6 +170,12 @@ const RegisterLogin = () => {
                 placeholder="Password"
                 onChange={handlePassword}
               />
+              <p
+                aria-live="assertive"
+                style={{ color: "red", textAlign: "center" }}
+              >
+                {errMsg}
+              </p>
               <button type="submit">Login</button>
             </form>
           </div>
