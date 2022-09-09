@@ -121,9 +121,7 @@ const RegisterLogin = () => {
               <label for="chk" aria-hidden="true">
                 Sign up
               </label>
-              <p aria-live="assertive" style={{ color: "red" }}>
-                {errMsg}
-              </p>
+              
               <input
                 value={username}
                 // ref={userNameRef}
@@ -138,6 +136,9 @@ const RegisterLogin = () => {
                 onChange={handlePassword}
                 placeholder="Password"
               />
+              <p aria-live="assertive" style={{ color: "red",textAlign:"center" }}>
+                {errMsg}
+              </p>
               <button type="submit">Sign up</button>
             </form>
           </div>
