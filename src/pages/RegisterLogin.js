@@ -1,36 +1,31 @@
 import React from "react";
 import "../pages/RegsiterLogin.css";
-import { useState, useEffect, useRef } from "react";
+import { useState, useContext, useRef, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/Auth";
+
 const RegisterLogin = () => {
-  const userRef = useRef("");
-  const errRef = useRef("");
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    console.log(username, email, password);
-    setSuccessmsg(true);
-    const id="0987654321";
-    try {
-      const data = axios.post(
-        "http://localhost:5000/adduser",({ username, email, password,id }),{headers:{"Content-Type" : "application/json"}}
-      );
-      console.log({ username, email, password,id });
-    } catch(error) {
-      console.error(error.data); 
-    }
-  };
+  // const { setAuth } = useContext(AuthContext);
+  // const userNameRef = useRef();
+  // const errRef = useRef();
 
   const [username, setUsername] = useState("");
-  const [usernamefocus, setUsernamefocus] = useState(false);
+  const [validuserName, setValiduserName] = useState(false);
+  const [userNameFocus, setUserNameFocus] = useState(false);
 
   const [email, setEmail] = useState("");
-  const [emailfocus, setEmailfocus] = useState(false);
+  const [validEmail, setValidEmail] = useState(false);
+  const [EmailFocus, setEmailFocus] = useState(false);
 
   const [password, setPassword] = useState("");
-  const [passwordfocus, setPasswordfocus] = useState(false);
+  const [validPwd, setValidPwd] = useState(false);
+  const [pwdFocus, setPwdFocus] = useState(false);
 
-  const [successmsg, setSuccessmsg] = useState("");
-  const [errormsg, setErrormsg] = useState(false);
+  const [errMsg, setErrMsg] = useState("");
+  const [success, setSuccess] = useState(false);
+
+  // console.log("=====s===",errMsg);
 
   const handleUsername = (e) => {
     setUsername(e.target.value);
@@ -45,55 +40,125 @@ const RegisterLogin = () => {
   };
 
   // useEffect(() => {
-  //   const data = axios.post("http://localhost:5000/api/users");
-  // }, [handleSubmit]);
+  //   userNameRef.current.focus();
+  // }, []);
 
+  useEffect(() => {
+    setValiduserName(username);
+  }, [username]);
+
+  useEffect(() => {
+    setValidEmail(email);
+  }, [email]);
+
+  useEffect(() => {
+    setValidPwd(password);
+  }, [password]);
+
+  useEffect(() => {
+    setErrMsg("");
+  }, [username, password]);
+
+  const navigate = useNavigate();
+
+  const registerSubmit = async (e) => {
+    e.preventDefault();
+
+    console.log(username, email, password);
+
+    const id = "0987654321";
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/register",
+        { username, email, password, id },
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      setSuccess(true);
+      console.log("--c-dc-", response.data);
+      setUsername("");
+      setEmail("");
+      setPassword("");
+      navigate("/");
+      console.log({ username, email, password, id });
+    } catch (error) {
+      if (!error.response) {
+        setErrMsg("No Server Response");
+      } else if (error.response?.status === 400) {
+        setErrMsg("Email Already Registerd");
+      } else {
+        setErrMsg("Some Field is Missing");
+      }
+      console.error(error.data);
+    }
+  };
+
+  const loginSubmit = (e) => {
+    e.preventDefault();
+
+    try {
+      axios.post(
+        "http://localhost:5000/login",
+        { email, password },
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      navigate("/");
+    } catch (error) {
+      console.error(error.data);
+      navigate("/auth");
+    }
+  };
   return (
     <>
       <div className="respo">
-        <p ref={errRef} className={errormsg ? "errScreen" : "sucScreen"}>
-          {errormsg}
-        </p>
         <div className="main">
           <input type="checkbox" id="chk" aria-hidden="true" />
           <div className="signup">
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={registerSubmit}>
               <label for="chk" aria-hidden="true">
                 Sign up
               </label>
+              <p aria-live="assertive" style={{ color: "red" }}>
+                {errMsg}
+              </p>
               <input
                 value={username}
+                // ref={userNameRef}
                 onChange={handleUsername}
+                // onFocus={() => setUserNameFocus(true)}
+                // onBlur={() => setUserNameFocus(false)}
                 placeholder="User name"
-                onFocus={() => setUsernamefocus(true)}
-                onBlur={() => setUsernamefocus(false)}
               />
-              <input
-                value={email}
-                onChange={handleEmail}
-                placeholder="Email"
-                onFocus={() => setEmailfocus(true)}
-                onBlur={() => setEmailfocus(false)}
-              />
+              <input value={email} onChange={handleEmail} placeholder="Email" />
               <input
                 value={password}
                 onChange={handlePassword}
                 placeholder="Password"
-                onFocus={() => setPasswordfocus(true)}
-                onBlur={() => setPasswordfocus(false)}
               />
               <button type="submit">Sign up</button>
             </form>
           </div>
 
           <div className="login">
-            <form>
+            <form onSubmit={loginSubmit}>
               <label for="chk" aria-hidden="true">
                 Login
               </label>
-              <input type="email" name="email" placeholder="Email" />
-              <input type="password" name="pswd" placeholder="Password" />
-              <button>Login</button>
+              <input
+                type="email"
+                name="email"
+                placeholder="Email"
+                onChange={handleEmail}
+              />
+              <input
+                type="password"
+                name="pswd"
+                placeholder="Password"
+                onChange={handlePassword}
+              />
+              <button type="submit">Login</button>
             </form>
           </div>
         </div>
