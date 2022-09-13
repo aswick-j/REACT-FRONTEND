@@ -6,10 +6,15 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/Auth";
 import { API_URL } from "../action/ServerConnection";
 
+import bcrypt from "bcryptjs";
+
 const RegisterLogin = () => {
   // const { setAuth } = useContext(AuthContext);
-  // const userNameRef = useRef();
+  const userNameRef = useRef();
+  const passwordRef = useRef();
   // const errRef = useRef();
+
+  const salt = bcrypt.genSaltSync(10);
 
   const [username, setUsername] = useState("");
   const [validuserName, setValiduserName] = useState(false);
@@ -41,7 +46,8 @@ const RegisterLogin = () => {
   };
 
   // useEffect(() => {
-  //   userNameRef.current.focus();
+  // const data =   userNameRef.current.value
+  // console.log(userNameRef.current.value);
   // }, []);
 
   useEffect(() => {
@@ -62,6 +68,8 @@ const RegisterLogin = () => {
 
   const navigate = useNavigate();
 
+  const hashedPassword = bcrypt.hashSync(password, salt);
+
   const registerSubmit = async (e) => {
     e.preventDefault();
 
@@ -70,18 +78,23 @@ const RegisterLogin = () => {
     const id = "0987654321";
 
     try {
+      const password = hashedPassword;
       const response = await axios.post(
         `${API_URL}/register`,
         { username, email, password, id },
         { headers: { "Content-Type": "application/json" } }
       );
 
+      localStorage.setItem("token", response.data.token);
       setSuccess(true);
       console.log("--c-dc-", response.data);
       // setUsername("");
       // setEmail("");
       // setPassword("");
       navigate("/");
+      axios.defaults.headers.common[
+        "Authorization"
+      ] = `Beared${response.data.token}`;
       console.log({ username, email, password, id });
     } catch (error) {
       if (!error.response) {
@@ -104,7 +117,10 @@ const RegisterLogin = () => {
         { email, password },
         { headers: { "Content-Type": "application/json" } }
       );
+
+      localStorage.setItem("token", response.data.token);
       setSuccess(true);
+      console.log("--c-dc-", response.data);
       navigate("/");
     } catch (error) {
       console.error(error.data);
@@ -125,13 +141,13 @@ const RegisterLogin = () => {
           <input type="checkbox" id="chk" aria-hidden="true" />
           <div className="signup">
             <form onSubmit={registerSubmit}>
-              <label for="chk" aria-hidden="true">
+              <label htmlFor="chk" aria-hidden="true">
                 Sign up
               </label>
 
               <input
                 value={username}
-                // ref={userNameRef}
+                ref={userNameRef}
                 onChange={handleUsername}
                 // onFocus={() => setUserNameFocus(true)}
                 // onBlur={() => setUserNameFocus(false)}
@@ -139,6 +155,7 @@ const RegisterLogin = () => {
               />
               <input value={email} onChange={handleEmail} placeholder="Email" />
               <input
+                ref={passwordRef}
                 value={password}
                 onChange={handlePassword}
                 placeholder="Password"
@@ -155,7 +172,7 @@ const RegisterLogin = () => {
 
           <div className="login">
             <form onSubmit={loginSubmit}>
-              <label for="chk" aria-hidden="true">
+              <label htmlFor="chk" aria-hidden="true">
                 Login
               </label>
               <input
